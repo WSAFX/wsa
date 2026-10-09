@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/sitemap.xml", "destination": "https://api.wsfxacademy.com/api/public/sitemap.xml" },
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+  ]
+}
