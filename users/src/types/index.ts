@@ -33,8 +33,8 @@ export interface GalleryImage {
 export interface TeamMember {
   name: string;
   role: string;
-  image: string;
-  description: string;
+  image: string | null;
+  description?: string;
 }
 
 export interface Course {
@@ -100,7 +100,7 @@ export interface AboutContent {
   body_html: string;
   image_url: string | null;
   stats: { label: string; value: string }[];
-  team: { name: string; role: string; description: string; image_url?: string | null }[];
+  team: { name: string; role: string; image_url?: string | null }[];
 }
 
 export type CropMode = 'fill' | 'pad';

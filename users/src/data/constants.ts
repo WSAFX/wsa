@@ -105,13 +105,13 @@ export const TEAM_MEMBERS: TeamMember[] = [
   {
     name: 'Chukwuma Cornelius Chibuike',
     role: 'Chief Executive Officer & Lead Instructor',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop',
+    image: null,
     description: 'With over 15 years of forex trading experience and millions in profitable trades, Cornelius founded Wallstreet Forex Academy to share his expertise with aspiring traders across Nigeria.',
   },
   {
     name: 'Chukwuma Kamsi Cynthia',
     role: 'Secretary & Operations Director',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop',
+    image: null,
     description: 'Cynthia ensures smooth operations and exceptional student experiences at the academy. Her organizational skills and dedication keep the institution running at peak efficiency.',
   },
 ];

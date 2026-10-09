@@ -10,8 +10,15 @@ const About = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { about } = useSiteData();
   const team = about?.team?.length
-    ? about.team.map((m) => ({ name: m.name, role: m.role, description: m.description, image: m.image_url ?? null }))
+    ? about.team.map((m) => ({ name: m.name, role: m.role, image: m.image_url ?? null }))
     : TEAM_MEMBERS;
+  const initials = (name: string) =>
+    name
+      .split(' ')
+      .filter(Boolean)
+      .map((p) => p[0])
+      .slice(0, 2)
+      .join('');
 
   const features = [
     { icon: Target, title: 'Expert-Led Training', description: 'Learn from traders with proven track records and years of market experience.' },
@@ -163,42 +170,40 @@ const About = () => {
           transition={{ duration: 0.6, delay: 0.4 }}
         >
           <h3 className="text-3xl font-display font-bold text-adaptive text-center mb-12">
-            Meet Our <span className="gradient-text">Leadership</span>
+            Meet Our <span className="gradient-text">Team</span>
           </h3>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {/* Flex-wrap keeps 1, 2 or 3 people centred instead of leaving empty grid columns. */}
+          <div className="flex flex-wrap justify-center gap-6">
             {team.map((member, index) => (
-              <motion.div
-                key={member.name}
+              <motion.figure
+                key={`${member.name}-${index}`}
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: 0.5 + index * 0.1 }}
-                className="group"
+                transition={{ delay: 0.5 + index * 0.08 }}
+                className="group w-[calc(50%-0.75rem)] sm:w-60 lg:w-64"
               >
-                <div className="p-6 rounded-2xl bg-adaptive-card border border-adaptive transition-all duration-500 card-hover">
-                  <div className="flex items-start gap-4">
-                    <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-primary-500/30">
-                      {member.image ? (
-                        <img
-                          src={framedUrl(member.image, { aspect: '1:1', crop: 'fill', gravity: 'face', width: 200 })}
-                          alt={member.name}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700 text-2xl font-bold text-white">
-                          {member.name.split(' ').map((p) => p[0]).slice(0, 2).join('')}
-                        </div>
-                      )}
+                <div className="relative aspect-[3/4] overflow-hidden rounded-3xl border border-adaptive bg-adaptive-card shadow-xl shadow-primary-950/20">
+                  {member.image ? (
+                    <img
+                      src={framedUrl(member.image, { aspect: '3:4', crop: 'fill', gravity: 'faces', width: 600 })}
+                      alt={`${member.name}, ${member.role}`}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-500 to-primary-800 font-display text-5xl font-bold text-white/90">
+                      {initials(member.name)}
                     </div>
-                    <div>
-                      <h4 className="text-xl font-bold text-adaptive">{member.name}</h4>
-                      <p className="text-primary-500 text-sm mb-2">{member.role}</p>
-                      <p className="text-adaptive-secondary text-sm leading-relaxed">{member.description}</p>
-                    </div>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-dark-950/95 via-dark-950/60 to-transparent p-4 pt-16">
+                    <figcaption>
+                      <p className="text-lg font-bold leading-tight text-white">{member.name}</p>
+                      <p className="mt-1 text-sm font-medium text-accent-400">{member.role}</p>
+                    </figcaption>
                   </div>
                 </div>
-              </motion.div>
+              </motion.figure>
             ))}
           </div>
         </motion.div>

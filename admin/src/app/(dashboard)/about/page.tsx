@@ -34,7 +34,19 @@ export default function AboutAdminPage() {
     set('team', team);
   }
 
+  function moveMember(i: number, dir: -1 | 1) {
+    const team = [...a!.team];
+    const j = i + dir;
+    if (j < 0 || j >= team.length) return;
+    [team[i], team[j]] = [team[j], team[i]];
+    set('team', team);
+  }
+
   async function save() {
+    if (a!.team.some((m) => !m.name.trim() || !m.role.trim())) {
+      setError('Every team member needs a name and a position.');
+      return;
+    }
     setSaving(true);
     setMsg('');
     setError('');
@@ -126,57 +138,86 @@ export default function AboutAdminPage() {
         </div>
 
         <div className="card space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-bold text-brand-ink">Leadership team</p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-bold text-brand-ink">Team</p>
+              <p className="text-xs text-brand-muted">
+                Name, position and picture for each person. Use a clear head-and-shoulders photo; it is
+                cropped around the face automatically.
+              </p>
+            </div>
             <button
-              className="text-sm font-semibold text-brand-primary"
+              className="btn btn-ghost shrink-0"
               onClick={() => set('team', [...a.team, { name: '', role: '', description: '', image_url: null }])}
             >
               + Add member
             </button>
           </div>
           {a.team.length === 0 && <p className="text-sm text-gray-400">No team members added.</p>}
-          {a.team.map((member, i) => (
-            <div key={i} className="grid gap-4 border-t border-black/5 pt-4 first:border-0 first:pt-0 sm:grid-cols-[180px_1fr]">
-              <ImageUpload
-                value={member.image_url ?? null}
-                folder="team"
-                height={140}
-                onUploaded={(url, publicId) =>
-                  setMember(i, { image_url: url || null, image_public_id: publicId || null })
-                }
-              />
-              <div className="space-y-3">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <input
-                    className="input"
-                    placeholder="Full name"
-                    value={member.name}
-                    onChange={(e) => setMember(i, { name: e.target.value })}
-                  />
-                  <input
-                    className="input"
-                    placeholder="Role (e.g. Lead Instructor)"
-                    value={member.role}
-                    onChange={(e) => setMember(i, { role: e.target.value })}
-                  />
-                </div>
-                <textarea
-                  className="input"
-                  rows={3}
-                  placeholder="Short bio"
-                  value={member.description}
-                  onChange={(e) => setMember(i, { description: e.target.value })}
+          {a.team.some((m) => !m.image_url) && (
+            <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+              {a.team.filter((m) => !m.image_url).length} member(s) have no picture yet. They show initials on the
+              website until you upload one.
+            </p>
+          )}
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {a.team.map((member, i) => (
+              <div key={i} className="rounded-xl border border-black/5 bg-brand-bg/50 p-3">
+                <ImageUpload
+                  value={member.image_url ?? null}
+                  folder="team"
+                  height={200}
+                  onUploaded={(url, publicId) => setMember(i, { image_url: url || null, image_public_id: publicId || null })}
                 />
-                <button
-                  className="text-sm text-gray-400 hover:text-red-600"
-                  onClick={() => set('team', a.team.filter((_, idx) => idx !== i))}
-                >
-                  Remove member
-                </button>
+                <div className="mt-3 space-y-2">
+                  <div>
+                    <label className="label">Name</label>
+                    <input
+                      className="input"
+                      placeholder="Full name"
+                      value={member.name}
+                      onChange={(e) => setMember(i, { name: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Position</label>
+                    <input
+                      className="input"
+                      placeholder="e.g. Lead Instructor"
+                      value={member.role}
+                      onChange={(e) => setMember(i, { role: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between text-gray-400">
+                  <div className="flex gap-1">
+                    <button
+                      aria-label="Move earlier"
+                      disabled={i === 0}
+                      onClick={() => moveMember(i, -1)}
+                      className="rounded px-2 py-1 hover:bg-white hover:text-brand-primary disabled:opacity-30"
+                    >
+                      ←
+                    </button>
+                    <button
+                      aria-label="Move later"
+                      disabled={i === a.team.length - 1}
+                      onClick={() => moveMember(i, 1)}
+                      className="rounded px-2 py-1 hover:bg-white hover:text-brand-primary disabled:opacity-30"
+                    >
+                      →
+                    </button>
+                  </div>
+                  <button
+                    className="text-xs hover:text-red-600"
+                    onClick={() => set('team', a.team.filter((_, idx) => idx !== i))}
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
