@@ -1,4 +1,8 @@
-import { motion } from 'framer-motion';
+import { motion, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
+import ParticleField from './fx/ParticleField';
+import FloatingSymbols from './fx/FloatingSymbols';
+import CountUp from './fx/CountUp';
+import TiltCard from './fx/TiltCard';
 import { TrendingUp, ArrowRight, Play, BarChart3, Shield, Award } from 'lucide-react';
 import { STATS, CURRENCY_PAIRS } from '../data/constants';
 import { useSiteData } from '../context/SiteDataContext';
@@ -17,18 +21,51 @@ const DEFAULT_HERO: HeroContent = {
   secondary_cta_href: '#about',
 };
 
-/** Renders the heading with the admin-chosen phrase in the brand gradient. */
+/** The heading, revealed word by word, with the admin-chosen phrase in the brand gradient. */
 const HighlightedHeading = ({ heading, highlight }: { heading: string; highlight: string }) => {
   const idx = highlight ? heading.indexOf(highlight) : -1;
-  if (idx < 0) return <span className="text-adaptive">{heading}</span>;
+  const segments =
+    idx < 0
+      ? [{ text: heading, hl: false }]
+      : [
+          { text: heading.slice(0, idx), hl: false },
+          { text: highlight, hl: true },
+          { text: heading.slice(idx + highlight.length), hl: false },
+        ];
+  const words = segments.flatMap((seg) =>
+    seg.text
+      .split(' ')
+      .filter(Boolean)
+      .map((w) => ({ w, hl: seg.hl })),
+  );
   return (
     <>
-      <span className="text-adaptive">{heading.slice(0, idx)}</span>
-      <span className="gradient-text">{highlight}</span>
-      <span className="text-adaptive">{heading.slice(idx + highlight.length)}</span>
+      {words.map(({ w, hl }, i) => (
+        <span key={i} className="inline-block overflow-hidden pb-2 align-bottom">
+          <motion.span
+            className={`inline-block ${hl ? 'gradient-text' : 'text-adaptive'}`}
+            initial={{ y: '110%', rotate: 6, opacity: 0 }}
+            animate={{ y: '0%', rotate: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.35 + i * 0.09, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {w}
+          </motion.span>
+          {i < words.length - 1 && '\u00A0'}
+        </span>
+      ))}
     </>
   );
 };
+
+/** Big blurred colour orbs that slowly drift behind the hero. */
+const Orb = ({ className, duration, path }: { className: string; duration: number; path: { x: number[]; y: number[] } }) => (
+  <motion.div
+    aria-hidden
+    className={`pointer-events-none absolute rounded-full blur-3xl ${className}`}
+    animate={{ x: path.x, y: path.y, scale: [1, 1.15, 0.95, 1] }}
+    transition={{ duration, repeat: Infinity, ease: 'easeInOut' }}
+  />
+);
 
 const Hero = () => {
   const { hero: liveHero, about } = useSiteData();
@@ -36,27 +73,27 @@ const Hero = () => {
   const stats = about?.stats?.length ? about.stats : STATS;
   const goTo = useSectionNav();
 
+  const mx = useSpring(useMotionValue(-500), { stiffness: 120, damping: 25 });
+  const my = useSpring(useMotionValue(-500), { stiffness: 120, damping: 25 });
+  const spotlight = useMotionTemplate`radial-gradient(520px circle at ${mx}px ${my}px, rgba(59,130,246,0.14), transparent 70%)`;
+  const onPointerMove = (e: React.PointerEvent<HTMLElement>) => {
+    if (e.pointerType !== 'mouse') return;
+    const r = e.currentTarget.getBoundingClientRect();
+    mx.set(e.clientX - r.left);
+    my.set(e.clientY - r.top);
+  };
+
   return (
-    <section id="home" className="relative min-h-screen overflow-hidden hero-gradient">
+    <section id="home" onPointerMove={onPointerMove} className="relative min-h-screen overflow-hidden hero-gradient">
       <div className="absolute inset-0 grid-bg opacity-50" />
+      <ParticleField className="opacity-80" />
+      <motion.div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: spotlight }} />
+      <FloatingSymbols />
       
-      <div className="absolute top-1/4 left-10 opacity-20 animate-float">
-        <svg width="60" height="120" viewBox="0 0 60 120">
-          <rect x="25" y="20" width="10" height="80" fill="#3b82f6" rx="2" />
-          <line x1="30" y1="10" x2="30" y2="20" stroke="#3b82f6" strokeWidth="2" />
-          <line x1="30" y1="100" x2="30" y2="110" stroke="#3b82f6" strokeWidth="2" />
-        </svg>
-      </div>
-      <div className="absolute top-1/3 right-20 opacity-20 animate-float" style={{ animationDelay: '2s' }}>
-        <svg width="60" height="100" viewBox="0 0 60 100">
-          <rect x="25" y="30" width="10" height="50" fill="#ef4444" rx="2" />
-          <line x1="30" y1="20" x2="30" y2="30" stroke="#ef4444" strokeWidth="2" />
-          <line x1="30" y1="80" x2="30" y2="90" stroke="#ef4444" strokeWidth="2" />
-        </svg>
-      </div>
       
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-500/5 rounded-full blur-3xl" />
+      <Orb className="top-1/4 left-1/4 w-96 h-96 bg-primary-500/15" duration={18} path={{ x: [0, 80, -40, 0], y: [0, -50, 40, 0] }} />
+      <Orb className="bottom-1/4 right-1/4 w-96 h-96 bg-accent-500/10" duration={22} path={{ x: [0, -90, 30, 0], y: [0, 40, -60, 0] }} />
+      <Orb className="top-10 right-1/3 w-72 h-72 bg-primary-400/10" duration={26} path={{ x: [0, 60, -70, 0], y: [0, 70, 20, 0] }} />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -116,10 +153,12 @@ const Hero = () => {
                   key={stat.label}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 + index * 0.1 }}
+                  transition={{ delay: 1 + index * 0.12, type: 'spring', stiffness: 160, damping: 14 }}
                   className="text-center sm:text-left"
                 >
-                  <div className="text-3xl font-bold gradient-text-gold">{stat.value}</div>
+                  <div className="text-3xl font-bold gradient-text-gold">
+                    <CountUp value={stat.value} duration={2.2} />
+                  </div>
                   <div className="text-sm text-adaptive-muted">{stat.label}</div>
                 </motion.div>
               ))}
@@ -132,6 +171,7 @@ const Hero = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="relative hidden lg:block"
           >
+            <TiltCard className="rounded-3xl" max={8}>
             <div className="relative">
               <div className="gradient-border p-8 rounded-3xl relative z-10">
                 <div className="bg-primary-950/50 dark:bg-primary-950/50 light:bg-white/50 rounded-2xl p-6">
@@ -141,7 +181,13 @@ const Hero = () => {
                       <p className="text-primary-500 text-sm">Live Chart</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-green-500">1.0842</div>
+                      <motion.div
+                        className="text-2xl font-bold text-green-500 tabular-nums"
+                        animate={{ opacity: [1, 0.55, 1] }}
+                        transition={{ duration: 1.6, repeat: Infinity }}
+                      >
+                        <CountUp value="1.0842" duration={2.4} />
+                      </motion.div>
                       <div className="text-green-500 text-sm">+0.21%</div>
                     </div>
                   </div>
@@ -179,30 +225,45 @@ const Hero = () => {
                 </div>
               </div>
 
-              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.8 }} className="absolute -top-6 -right-6 glass rounded-2xl p-4 z-20">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.6, y: -30 }}
+                animate={{ opacity: 1, scale: 1, y: [0, -10, 0] }}
+                transition={{ opacity: { delay: 0.8 }, scale: { delay: 0.8, type: 'spring' }, y: { delay: 1.4, duration: 4, repeat: Infinity, ease: 'easeInOut' } }}
+                className="absolute -top-6 -right-6 glass rounded-2xl p-4 z-20"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
                     <Award className="w-5 h-5 text-green-500" />
                   </div>
                   <div>
-                    <p className="text-adaptive font-bold">+₦2.5M</p>
+                    <p className="text-adaptive font-bold">
+                      +<CountUp value="₦2.5M" duration={2.5} />
+                    </p>
                     <p className="text-xs text-adaptive-muted">This Month</p>
                   </div>
                 </div>
               </motion.div>
 
-              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1 }} className="absolute -bottom-4 -left-6 glass rounded-2xl p-4 z-20">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.6, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: [0, 10, 0] }}
+                transition={{ opacity: { delay: 1 }, scale: { delay: 1, type: 'spring' }, y: { delay: 1.6, duration: 5, repeat: Infinity, ease: 'easeInOut' } }}
+                className="absolute -bottom-4 -left-6 glass rounded-2xl p-4 z-20"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-accent-500/20 flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-accent-500" />
                   </div>
                   <div>
-                    <p className="text-adaptive font-bold">95%</p>
+                    <p className="text-adaptive font-bold">
+                      <CountUp value="95%" duration={2.5} />
+                    </p>
                     <p className="text-xs text-adaptive-muted">Success Rate</p>
                   </div>
                 </div>
               </motion.div>
             </div>
+            </TiltCard>
           </motion.div>
         </div>
       </div>

@@ -53,6 +53,14 @@ const MASONRY_COLS: Record<number, string> = {
   5: 'lg:columns-5',
 };
 
+// Each photo flies in from a different side, with a little spin.
+const FLY_FROM = [
+  { x: -140, y: 40, rotate: -12 },
+  { x: 0, y: 140, rotate: 6 },
+  { x: 140, y: 40, rotate: 12 },
+  { x: 0, y: -120, rotate: -6 },
+];
+
 const Gallery = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
@@ -166,10 +174,12 @@ const Gallery = () => {
                   type="button"
                   key={image.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.92 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.92 }}
-                  transition={{ duration: 0.4, delay: Math.min(index, 12) * 0.04 }}
+                  initial={{ opacity: 0, scale: 0.7, ...FLY_FROM[index % FLY_FROM.length] }}
+                  whileInView={{ opacity: 1, scale: 1, x: 0, y: 0, rotate: 0 }}
+                  viewport={{ once: true, amount: 0.15 }}
+                  exit={{ opacity: 0, scale: 0.85 }}
+                  whileHover={{ y: -6 }}
+                  transition={{ duration: 0.9, delay: (index % 3) * 0.12, ease: [0.16, 1, 0.3, 1] }}
                   className="group relative block w-full break-inside-avoid text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-2xl"
                   onClick={() => setSelected(index)}
                   aria-label={`View photo: ${image.caption || image.alt || 'gallery photo'}`}

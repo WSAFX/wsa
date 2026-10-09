@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Outlet, Route, Routes } from 'react-router-dom';
+import { MotionConfig } from 'framer-motion';
+import ScrollProgress from './components/fx/ScrollProgress';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider, useToastContext } from './context/ToastContext';
 import { SiteDataProvider } from './context/SiteDataContext';
@@ -20,6 +22,7 @@ function Layout() {
 
   return (
     <div className="min-h-screen bg-adaptive text-adaptive transition-colors duration-300">
+      <ScrollProgress />
       <Header onOpenChat={() => setIsChatOpen(true)} />
 
       <Outlet />
@@ -38,6 +41,8 @@ function Layout() {
 
 function App() {
   return (
+    // reducedMotion="user": visitors who ask their OS for less motion get fades instead of movement.
+    <MotionConfig reducedMotion="user">
     <ThemeProvider>
       <ToastProvider>
         <SiteDataProvider>
@@ -55,6 +60,7 @@ function App() {
         </SiteDataProvider>
       </ToastProvider>
     </ThemeProvider>
+    </MotionConfig>
   );
 }
 

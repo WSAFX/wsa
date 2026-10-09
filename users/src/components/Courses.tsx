@@ -7,6 +7,8 @@ import { useSectionNav } from '../hooks/useSectionNav';
 import { useSiteData } from '../context/SiteDataContext';
 import { whatsappLink } from '../lib/whatsapp';
 import type { CourseItem } from '../types';
+import TiltCard from './fx/TiltCard';
+import CountUp from './fx/CountUp';
 
 // Shown only if the API is unreachable.
 const FALLBACK: CourseItem[] = COURSES.map((c, i) => ({
@@ -73,10 +75,19 @@ const Courses = () => {
           {(courses ?? []).map((course, index) => {
             const cta = enroll(course);
             return (
-            <motion.div key={course.id} initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: index * 0.1 }} className="group relative">
+            <motion.div
+              key={course.id}
+              initial={{ opacity: 0, y: 120, rotateX: 35, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.9, delay: index * 0.15, ease: [0.16, 1, 0.3, 1] }}
+              style={{ transformPerspective: 1200 }}
+              className="group relative"
+            >
+              <TiltCard className="h-full rounded-3xl" max={7}>
               {course.highlighted && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                  <span className="px-4 py-1.5 rounded-full bg-gradient-to-r from-accent-500 to-accent-600 text-white text-sm font-bold whitespace-nowrap">{course.badge_text || 'Most Popular'}</span>
+                  <span className="px-4 py-1.5 rounded-full bg-gradient-to-r from-accent-500 to-accent-600 text-white text-sm font-bold whitespace-nowrap shadow-lg shadow-accent-500/40 animate-pulse">{course.badge_text || 'Most Popular'}</span>
                 </div>
               )}
               <div className={`h-full p-8 rounded-3xl border transition-all duration-500 card-hover ${course.highlighted ? 'bg-gradient-to-b from-primary-900/50 to-primary-950/50 border-primary-500/30' : 'bg-adaptive-card border-adaptive'}`}>
@@ -89,7 +100,7 @@ const Courses = () => {
                 </div>
                 <h3 className="text-2xl font-bold text-adaptive mb-3">{course.title}</h3>
                 <p className="text-adaptive-secondary mb-6">{course.description}</p>
-                <div className="mb-6"><span className="text-4xl font-bold gradient-text-gold">{course.price}</span></div>
+                <div className="mb-6"><span className="text-4xl font-bold gradient-text-gold"><CountUp value={course.price} duration={1.8} /></span></div>
                 <ul className="space-y-3 mb-8">
                   {course.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3">
@@ -122,6 +133,7 @@ const Courses = () => {
                   {course.cta_label || 'Enroll Now'} <ArrowRight className="w-4 h-4" />
                 </motion.a>
               </div>
+              </TiltCard>
             </motion.div>
             );
           })}

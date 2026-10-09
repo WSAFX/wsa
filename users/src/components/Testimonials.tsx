@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Star, ExternalLink, PenLine } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
+import CountUp from './fx/CountUp';
 import type { GoogleReview, TestimonialsData } from '../types';
 
 /** Google "G" mark, used for the required attribution. */
@@ -28,10 +29,11 @@ function ReviewCard({ review, index }: { review: GoogleReview; index: number }) 
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 80, rotateX: -40 }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
       viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.5, delay: Math.min(index, 5) * 0.08 }}
+      transition={{ duration: 0.8, delay: (index % 3) * 0.12, ease: [0.16, 1, 0.3, 1] }}
+      style={{ transformPerspective: 1000 }}
       className="relative flex h-full flex-col rounded-3xl border border-adaptive bg-adaptive-card p-7 transition-all duration-500 card-hover"
     >
       <div className="mb-4 flex items-center gap-3">
@@ -101,7 +103,7 @@ const Testimonials = () => {
           {summary.rating !== null && (
             <div className="mx-auto inline-flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-2xl border border-adaptive bg-adaptive-card px-6 py-4">
               <GoogleG className="h-7 w-7" />
-              <span className="font-display text-4xl font-bold text-adaptive">{summary.rating.toFixed(1)}</span>
+              <span className="font-display text-4xl font-bold text-adaptive"><CountUp value={summary.rating.toFixed(1)} /></span>
               <div className="text-left">
                 <Stars value={summary.rating} />
                 <p className="text-sm text-adaptive-muted">

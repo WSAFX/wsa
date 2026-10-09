@@ -3,6 +3,7 @@ import { motion, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Calculator, Check } from 'lucide-react';
 import PipCalculator from './PipCalculator';
+import ParticleField from './fx/ParticleField';
 import { INSTRUMENTS } from '../lib/instruments';
 
 const POINTS = [
@@ -20,6 +21,7 @@ const TraderTools = () => {
   return (
     <section id="tools" className="relative overflow-hidden py-24" ref={ref}>
       <div className="absolute inset-0 bg-gradient-to-b from-primary-950/20 to-transparent" />
+      <ParticleField density={0.35} interactive={false} className="opacity-40" />
       <div className="absolute left-0 right-0 top-0 section-divider" />
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
         <motion.div initial={{ opacity: 0, x: -40 }} animate={isInView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.7 }}>

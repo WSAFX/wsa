@@ -209,14 +209,24 @@ function GridView({ batch, featured, photos, open }: ViewProps) {
       <Banner batch={batch} image={featured} onOpen={() => open(-1)} />
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {photos.map((p, i) => (
-          <button key={p.id} type="button" onClick={() => open(i)} className="group overflow-hidden rounded-2xl" aria-label={`View photo ${i + 1}`}>
+          <motion.button
+            key={p.id}
+            type="button"
+            onClick={() => open(i)}
+            className="group overflow-hidden rounded-2xl"
+            aria-label={`View photo ${i + 1}`}
+            initial={{ opacity: 0, scale: 0.6, rotate: i % 2 ? 8 : -8, y: 60 }}
+            whileInView={{ opacity: 1, scale: 1, rotate: 0, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.7, delay: (i % 4) * 0.08, ease: [0.16, 1, 0.3, 1] }}
+          >
             <img
               src={framedUrl(p.image_url, { aspect: '1:1', crop: 'fill', width: 500 })}
               alt={p.caption || `${batch.name} photo ${i + 1}`}
               loading="lazy"
               className="aspect-square w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-          </button>
+          </motion.button>
         ))}
       </div>
     </div>

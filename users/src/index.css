@@ -491,3 +491,48 @@ body {
 .rich-text pre code { background: none; padding: 0; }
 .rich-text hr { border: 0; border-top: 1px solid rgba(59, 130, 246, 0.2); margin: 2em 0; }
 .article-body h2:first-child, .article-body h3:first-child { margin-top: 0; }
+
+/* ---- Motion layer ---- */
+/* Gradient headings slowly shimmer. */
+.gradient-text,
+.gradient-text-gold {
+  background-size: 200% auto;
+  animation: text-shimmer 6s ease-in-out infinite;
+}
+@keyframes text-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* A light pulse travels along each section divider. */
+.section-divider {
+  overflow: hidden;
+}
+.section-divider:not(.absolute) {
+  position: relative;
+}
+.section-divider::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -30%;
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(234, 179, 8, 0.9), transparent);
+  animation: divider-sweep 5s ease-in-out infinite;
+}
+@keyframes divider-sweep {
+  0% { left: -30%; }
+  60%, 100% { left: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gradient-text,
+  .gradient-text-gold,
+  .section-divider::after,
+  .animate-float,
+  .animate-pulse,
+  .ticker-content {
+    animation: none !important;
+  }
+}
